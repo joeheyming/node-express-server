@@ -8,37 +8,36 @@ const bcryptHash = promisify(bcrypt.hash);
 
 import User from '../../models/user';
 
-export const signupCtrl = ({ email, password }) =>
-  bcryptHash(password, 10).then(hash => {
-    const user = new User({
-      _id: new mongoose.Types.ObjectId(),
-      email: email,
-      password: hash
-    });
-
-    return user.save().then(() => ({ user }));
+export const signupCtrl = async ({ email, password }) => {
+  const hash = await bcryptHash(password, 10)
+  const user = new User({
+    _id: new mongoose.Types.ObjectId(),
+    email: email,
+    password: hash
   });
 
-export const signinCtrl = ({ email, password }) =>
-  User.findOne({ email })
-    .exec()
-    .then(user =>
-      bcryptCompare(password, user.password).then(result => {
-        if (result) {
-          const JWTToken = jwt.sign(
-            {
-              email: user.email,
-              _id: user._id
-            },
-            'secret',
-            {
-              expiresIn: '2h'
-            }
-          );
+  await user.save();
+  return { user };
+}
 
-          return { user, token: JWTToken };
-        }
-
-        throw new Error('test custom error');
-      })
+export const signinCtrl = async ({ email, password }) => {
+  const user = await (User.findOne({ email }).exec());
+  const result = await bcryptCompare(password, user.password);
+  
+  if (result) {
+    const JWTToken = jwt.sign(
+      {
+        email: user.email,
+        _id: user._id
+      },
+      'secret',
+      {
+        expiresIn: '2h'
+      }
     );
+
+    return { user, token: JWTToken };
+  }
+  
+  throw new Error('test custom error');
+}

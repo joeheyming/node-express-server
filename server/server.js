@@ -14,26 +14,28 @@ import routes from './routes';
 const app = express();
 const serverPort = serverSettings.port;
 
-const SERVER = app.listen(serverPort, () => {
+const SERVER = app.listen(serverPort, async () => {
   console.clear();
   console.info(chalk.green(logMessages.server.connection), serverSettings.port);
-  dbConnection()
-    .then(res => console.log(chalk.green(res)))
-    .catch(err => console.error(chalk.red(err)));
+  try {
+    const res = await dbConnection();
+    console.log(chalk.green(res));
+  } catch(err) {
+    console.error(chalk.red(err));
+  }
 });
 
 process.on('SIGINT', () => {
-  SERVER.close(() => {
-    dbDisconnection()
-      .then(res => {
-        console.clear();
-        console.log(chalk.yellow(res));
-      })
-      .catch(err => console.error(chalk.red(err)))
-      .finally(() => {
-        console.log(chalk.yellow(logMessages.server.disconnection));
-        process.exit(0);
-      });
+  SERVER.close(async () => {
+    try {
+      const res = await dbDisconnection();
+      console.clear();
+      console.log(chalk.yellow(res));
+    } catch(err) {
+      console.error(chalk.red(err));
+    }
+    console.log(chalk.yellow(logMessages.server.disconnection));
+    process.exit(0);
   });
 });
 

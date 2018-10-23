@@ -8,8 +8,10 @@ const connSettings = {
   useNewUrlParser: true
 };
 
-export default () =>
-  MongoDB.connect(
+export default async () => {
+  await MongoDB.connect(
     connUrl,
     connSettings
-  ).then(() => logMessages.database.connection);
+  );
+  return logMessages.database.connection;
+}
