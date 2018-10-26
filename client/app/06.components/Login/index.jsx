@@ -15,24 +15,23 @@ class Login extends Component {
     });
   };
 
-  handleSubmit = event => {
+  handleSubmit = async event => {
     event.preventDefault();
-    axios
-      .post('http://localhost:9009/api/v1/user/login', {
-        email: this.state.email,
-        password: this.state.password
-      })
-      .then(res => {
-        console.log('-------------RES', res);
-        res.data &&
-          res.data.data.user &&
-          this.setState({
-            user: res.data.data.user
-          });
-      })
-      .catch(err => {
-        console.error('ERR', err);
-      });
+    try {
+      const res = await axios
+        .post('http://localhost:9009/api/v1/user/login', {
+          email: this.state.email,
+          password: this.state.password
+        });
+      console.log('-------------RES', res);
+      if (res.data && res.data.data.user) {
+        this.setState({
+          user: res.data.data.user
+        });
+      }
+    } catch(err) {
+      console.error('ERR', err);
+    }
   };
 
   render() {

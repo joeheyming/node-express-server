@@ -1,94 +1,55 @@
 import mongoose from 'mongoose';
 
 import Article from '../models/article';
+import { notFoundError, validationError } from '../utils/error';
 
-export const createCtrl = ({ title, text, author }) =>
-  new Promise((resolve, reject) => {
-    !title &&
-      reject({
-        status: 422,
-        message: 'TITLE is required'
-      });
+function checkArg(arg, argName) {
+  if(!arg) {
+    validationError(`${argName} is required`);
+  }
+}
 
-    !text &&
-      reject({
-        status: 422,
-        message: 'TEXT is required'
-      });
+export const createCtrl = async ({ title, text, author }) => {
+  checkArg(title, 'TITLE');
+  checkArg(text, 'TEXT');
+  checkArg(author, 'AUTHOR');
 
-    !author &&
-      reject({
-        status: 422,
-        message: 'AUTHOR is required'
-      });
-
-    const finalArticle = new Article({
-      _id: new mongoose.Types.ObjectId(),
-      title: title,
-      text: text,
-      author: author,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-
-    finalArticle
-      .save()
-      .then(article => resolve(article))
-      .catch(err => reject(err));
+  const finalArticle = new Article({
+    _id: new mongoose.Types.ObjectId(),
+    title: title,
+    text: text,
+    author: author,
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
 
-export const getAllCtrl = () => {
-  return Article.find()
-    .sort({ createdAt: 'descending' })
-    .then(articles => articles)
-    .catch(err => err);
+  return await finalArticle.save();
 };
 
-export const getIdCtrl = id =>
-  new Promise((resolve, reject) => {
-    Article.findById(id, (err, article) => {
-      (err || !article) &&
-        reject({ status: 404, message: 'Article not found' });
-      resolve(article);
-    });
-  });
+export const getAllCtrl = async () => await Article.find().sort({ createdAt: 'descending' });
 
-export const patchCtrl = (id, { title, text, author }) =>
-  new Promise((resolve, reject) => {
-    !title &&
-      reject({
-        status: 422,
-        message: 'TITLE is required'
-      });
+export const getIdCtrl = async id => {
+  const article = await Article.findById(id).exec();
+  !article && notFoundError('Article not found');
+  return article;
+}
 
-    !text &&
-      reject({
-        status: 422,
-        message: 'TEXT is required'
-      });
+export const patchCtrl = async (id, { title, text, author }) => {
+  checkArg(title, 'TITLE');
+  checkArg(text, 'TEXT');
+  checkArg(author, 'AUTHOR');
+  
+  const data = await Article.findById(id).exec();
+  !data && notFoundError('Article not found');
 
-    !author &&
-      reject({
-        status: 422,
-        message: 'AUTHOR is required'
-      });
+  data.title = title;
+  data.text = text;
+  data.updatedAt = new Date();
+  return await data.save();
+}
 
-    Article.findById(id, (err, data) => {
-      (err || !data) && reject({ status: 404, message: 'Article not found' });
-      if (data) {
-        data.title = title;
-        data.text = text;
-        data.updatedAt = new Date();
-        return data.save();
-      }
-    }).then(article => resolve(article));
-  });
-
-export const deleteCtrl = id =>
-  new Promise((resolve, reject) => {
-    Article.findByIdAndDelete(id, (err, article) => {
-      (err || !article) &&
-        reject({ status: 404, message: 'Article not found' });
-      resolve({ message: 'Article deleted successfully', article });
-    });
-  });
+export const deleteCtrl = async id => {
+  const article = await Article.findByIdAndDelete(id).exec();
+  !article && notFoundError('Article not found');
+  return { message: 'Article deleted successfully', article };
+}

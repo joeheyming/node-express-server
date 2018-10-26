@@ -1,7 +1,7 @@
 import MongoDB from 'mongoose';
 import { logMessages } from '../../config';
 
-export default () =>
-  MongoDB.disconnect()
-    .then(() => logMessages.database.disconnection)
-    .catch(err => err);
+export default async () => {
+  await MongoDB.disconnect();
+  return logMessages.database.disconnection;
+}

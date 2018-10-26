@@ -32,24 +32,26 @@ const sessionSettings = session({
   }
 });
 
-const SERVER = app.listen(serverPort, () => {
+const SERVER = app.listen(serverPort, async () => {
   console.info(logMessages.server.connection, serverSettings.port);
-  dbConnection()
-    .then(res => console.log(res))
-    .catch(err => console.error(err));
+  try {
+    const res = await dbConnection();
+    console.log(res);
+  } catch(err) {
+    console.error(err);
+  }
 });
 
 process.on('SIGINT', () => {
-  SERVER.close(() => {
-    dbDisconnection()
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => console.error(err))
-      .finally(() => {
-        console.log(logMessages.server.disconnection);
-        process.exit(0);
-      });
+  SERVER.close(async () => {
+    try {
+      const res = await dbDisconnection();
+      console.log(res);
+    } catch(err) {
+      console.error(err)
+    }
+    console.log(logMessages.server.disconnection);
+    process.exit(0);
   });
 });
 

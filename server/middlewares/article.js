@@ -6,45 +6,50 @@ import {
   deleteCtrl
 } from '../controllers/article';
 
-export const createMid = (req, res, next) => {
-  createCtrl(req.body)
-    .then(data => {
-      res.status(200).json({
-        message: 'New article has been created',
-        data: data
-      });
-    })
-    .catch(next);
+export const createMid = async (req, res, next) => {
+  try {
+    const data = await createCtrl(req.body);
+    res.status(200).json({
+      message: 'New article has been created',
+      data: data
+    });
+  } catch(error) {
+    next(error);
+  }
 };
 
-export const getAllMid = (req, res, next) => {
-  getAllCtrl()
-    .then(data => {
-      res.status(200).json({ data });
-    })
-    .catch(next);
+export const getAllMid = async (req, res, next) => {
+  try {
+    const data = await getAllCtrl();
+    res.status(200).json({ data });
+  } catch(error) {
+    next(error);
+  }
 };
 
-export const getIdMid = (req, res, next) => {
-  getIdCtrl(req.params.id)
-    .then(data => {
-      res.status(200).json({ data });
-    })
-    .catch(next);
+export const getIdMid = async (req, res, next) => {
+  try {
+    const data = getIdCtrl(req.params.id);
+    res.status(200).json({ data });
+  } catch(error) {
+    next(error);
+  }
 };
 
-export const patchMid = (req, res, next) => {
-  patchCtrl(req.params.id, req.body)
-    .then(data => {
-      res.status(200).json({ data });
-    })
-    .catch(next);
+export const patchMid = async (req, res, next) => {
+  try {
+    const data = await patchCtrl(req.params.id, req.body);
+    res.status(200).json({ data });
+  } catch(error) {
+    next(error);
+  }
 };
 
-export const deleteMid = (req, res, next) => {
-  deleteCtrl(req.params.id)
-    .then(data => {
-      res.status(200).json({ data });
-    })
-    .catch(next);
+export const deleteMid = async (req, res, next) => {
+  try {
+    const data = await deleteCtrl(req.params.id);
+    res.status(200).json({ data });
+  } catch(error) {
+    next(error);
+  }
 };

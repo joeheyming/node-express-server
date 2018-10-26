@@ -8,17 +8,17 @@ import Home from 'Components/Home';
 import Login from 'Components/Login';
 import Dashboard from 'Components/Dashboard';
 
-const authUser = () => {
-  axios
-    .get('http://localhost:9009/api/v1/user/current')
-    .then(data => {
-      console.log('-------------------------', data);
-      return data;
-    })
-    .catch(err => {
-      console.error('----------ERROR', err);
-      return false;
-    });
+const authUser = async () => {
+  try {
+    const data = await axios
+      .get('http://localhost:9009/api/v1/user/current');
+    console.log('-------------------------', data);
+    return data;
+    
+  } catch(err) {
+    console.error('----------ERROR', err);
+    return false;
+  }
 };
 
 const App = () => {
